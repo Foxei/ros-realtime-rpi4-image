@@ -73,13 +73,27 @@ def parse_arguments():
   mount_parser.add_argument("image", type=str, help="The path to the image to be mounted")
 
   subparsers.add_parser("umount", help="unmount an image mounted for interaction via the mount sub-command")
+  subparsers.add_parser("umount_workspace", help="unmount an image mounted for interaction via the mount sub-command")
 
   subparsers.add_parser("toolchain", help="prints the path to the cmake toolchain location")
+  workspace_parser = subparsers.add_parser("mount_workspace", help="will mount the provided folder in the /tmp/workspace inside the image")
+  workspace_parser.add_argument(
+    "--workspace-dir",
+    help="The path to the workspace that should be mounted."
+  )
+
 
   # Convert the action into a callable function.
   args = parser.parse_args()
   args.action = globals()[args.action]
   return args
+
+def mount_workspace(args):
+  logging.error("Mounting {} as workspace".format(args.workspace_dir))
+  subprocess.run(["mount", "--bind", args.workspace_dir, "/tmp/rpi4-image-build/tmp/"], check=True)
+
+def umount_workspace(args):
+  subprocess.run(["umount", "/tmp/rpi4-image-build/tmp/"], check=True)
 
 
 def build(args):
